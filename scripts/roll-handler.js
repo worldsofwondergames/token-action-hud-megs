@@ -42,6 +42,8 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     return this.#rollAttribute(actor, actionId);
 
                 case ACTION_TYPE.power:
+                    return this.#rollPower(actor, actionId);
+
                 case ACTION_TYPE.skill:
                 case ACTION_TYPE.subskill:
                     return this.#rollItem(actor, actionId);
@@ -133,8 +135,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         /**
          * A gadget with nothing to roll -- no AV/EV, no child power or skill with
          * APs, no attribute pair -- would otherwise just post its description to
-         * chat, which reads as the button doing nothing. Open its sheet instead,
-         * with edit mode off so it opens read-only.
+         * chat, which reads as the button doing nothing. Open its sheet instead.
          *
          * @private
          */
@@ -146,9 +147,25 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             }
 
             if (isGadgetRollable(item, actor)) return item.roll();
+            return openSheetReadOnly(item);
+        }
 
-            await item.setFlag('megs', 'edit-mode', false);
-            return item.sheet.render(true);
+        /**
+         * Automatic powers are not rolled -- the character sheet marks them with a
+         * greyed d10 and rolling one produces nothing meaningful. Open the power's
+         * sheet instead so the button still does something useful.
+         *
+         * @private
+         */
+        async #rollPower(actor, itemId) {
+            const item = actor.items.get(itemId);
+            if (!item) {
+                console.warn(`token-action-hud-megs: power ${itemId} not found on ${actor.name}`);
+                return;
+            }
+
+            if (!isAutomatic(item)) return item.roll();
+            return openSheetReadOnly(item);
         }
 
         /** @private */
@@ -176,6 +193,23 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
     };
 });
+
+/**
+ * Open an item's sheet without edit mode.
+ *
+ * The sheet derives its mode from the `megs.edit-mode` flag and falls back to
+ * ownership when the flag is unset -- which means a GM would get edit mode. So
+ * the flag is written explicitly before rendering.
+ */
+export async function openSheetReadOnly(item) {
+    await item.setFlag('megs', 'edit-mode', false);
+    return item.sheet.render(true);
+}
+
+/** Automatic powers are marked type "auto" and are not rolled. */
+export function isAutomatic(item) {
+    return item.system?.type === 'auto';
+}
 
 /**
  * Whether a gadget has anything to roll.

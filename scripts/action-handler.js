@@ -132,6 +132,9 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     name: `${item.name}: ${item.system.aps}`,
                     listName: `Action: ${item.name}`,
                     img: coreModule.api.Utils.getImage(item),
+                    // Automatic powers are not rolled; the character sheet greys
+                    // their d10 and the HUD dims them to match.
+                    cssClass: item.system.type === 'auto' ? 'disabled' : '',
                     system: { actionType: ACTION_TYPE.power, actionId: item.id },
                 }));
 
