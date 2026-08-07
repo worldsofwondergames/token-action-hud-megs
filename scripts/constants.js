@@ -40,6 +40,7 @@ export const CHARACTER_TYPES = ['hero', 'villain', 'npc'];
 export const GADGET_ONLY_TYPES = ['vehicle', 'location'];
 
 export const GROUP = {
+    acting: { id: 'acting', name: 'tokenActionHud.megs.attributes', type: 'system' },
     physical: { id: 'physical', name: 'tokenActionHud.megs.physical', type: 'system' },
     mental: { id: 'mental', name: 'tokenActionHud.megs.mental', type: 'system' },
     mystical: { id: 'mystical', name: 'tokenActionHud.megs.mystical', type: 'system' },

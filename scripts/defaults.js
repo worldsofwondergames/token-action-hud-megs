@@ -22,6 +22,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 id: 'attributes',
                 name: coreModule.api.Utils.i18n('tokenActionHud.megs.attributes'),
                 groups: [
+                    { ...groups.acting, nestId: 'attributes_acting' },
                     { ...groups.physical, nestId: 'attributes_physical' },
                     { ...groups.mental, nestId: 'attributes_mental' },
                     { ...groups.mystical, nestId: 'attributes_mystical' },

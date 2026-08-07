@@ -59,40 +59,59 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
          * when clicked.
          */
         #buildAttributes() {
-            const attributes = this.actor.system?.attributes ?? {};
+            const attributes = Object.entries(this.actor.system?.attributes ?? {});
+            if (!attributes.length) return;
+
             const showNonRollable = game.settings.get(MODULE.ID, 'showNonRollableAttributes');
+
+            // Only the Acting attributes: put all three in one group. Splitting
+            // three entries across Physical / Mental / Mystical would give three
+            // submenus holding one item each.
+            if (!showNonRollable) {
+                const actions = attributes
+                    .filter(([, attr]) => (attr.rolls ?? []).includes(ACTION_ROLL))
+                    .map(([key, attr]) => this.#attributeAction(key, attr, true));
+                if (actions.length) this.addActions(actions, { id: GROUP.acting.id });
+                return;
+            }
+
+            // All nine: group by the attribute's own category so they form a
+            // 3x3 square.
             const byCategory = new Map(ATTRIBUTE_CATEGORIES.map(c => [c, []]));
-
-            for (const [key, attribute] of Object.entries(attributes)) {
-                const isRollable = (attribute.rolls ?? []).includes(ACTION_ROLL);
-                if (!isRollable && !showNonRollable) continue;
-
-                const category = attribute.type ?? ATTRIBUTE_CATEGORIES[0];
+            for (const [key, attr] of attributes) {
+                const isRollable = (attr.rolls ?? []).includes(ACTION_ROLL);
+                const category = attr.type ?? ATTRIBUTE_CATEGORIES[0];
                 if (!byCategory.has(category)) byCategory.set(category, []);
-
-                // The abbreviation, not the full label: nine attributes have to
-                // fit a 3x3 grid, and the sheet labels them this way too. The
-                // full name still appears in the tooltip via listName.
-                const abbr = key.toUpperCase();
-                const name = attribute.label ?? abbr;
-                byCategory.get(category).push({
-                    id: `attribute-${key}`,
-                    name: `${abbr} ${attribute.value ?? 0}`,
-                    listName: `Action: ${name}`,
-                    cssClass: isRollable ? '' : 'disabled',
-                    system: {
-                        actionType: isRollable ? ACTION_TYPE.attribute : ACTION_TYPE.attributeInfo,
-                        actionId: key,
-                    },
-                });
+                byCategory.get(category).push(this.#attributeAction(key, attr, isRollable));
             }
 
             for (const [category, actions] of byCategory) {
                 if (!actions.length) continue;
                 const group = GROUP[category];
-                if (!group) continue;
-                this.addActions(actions, { id: group.id });
+                if (group) this.addActions(actions, { id: group.id });
             }
+        }
+
+        /**
+         * The abbreviation, not the full label: nine of these have to fit a 3x3
+         * grid, and the character sheet labels them the same way. The full name
+         * stays on the tooltip via listName.
+         *
+         * @private
+         */
+        #attributeAction(key, attribute, isRollable) {
+            const abbr = key.toUpperCase();
+            const name = attribute.label ?? abbr;
+            return {
+                id: `attribute-${key}`,
+                name: `${abbr} ${attribute.value ?? 0}`,
+                listName: `Action: ${name}`,
+                cssClass: isRollable ? '' : 'disabled',
+                system: {
+                    actionType: isRollable ? ACTION_TYPE.attribute : ACTION_TYPE.attributeInfo,
+                    actionId: key,
+                },
+            };
         }
 
         /* ---------------------------------------------------------------- */

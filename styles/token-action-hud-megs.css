@@ -18,6 +18,14 @@
 }
 
 /*
+ * With only the Acting attributes shown -- the default -- all three sit in one
+ * group, so that single row is the whole square.
+ */
+#token-action-hud-app [data-nest-id="attributes_acting"] .tah-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/*
  * Skills get equal widths too, but the column count adapts. Skill names are far
  * longer than attribute abbreviations, so pinning them to three columns would
  * squeeze them unreadably on a narrow HUD.

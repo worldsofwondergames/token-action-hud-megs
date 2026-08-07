@@ -26,7 +26,7 @@ export function register(onChangeFunction) {
         scope: 'client',
         config: true,
         type: Boolean,
-        default: true,
+        default: false,
         onChange: (value) => {
             onChangeFunction(value);
         },
