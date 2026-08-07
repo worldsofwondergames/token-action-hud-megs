@@ -10,6 +10,9 @@
     "esmodules": [
         "scripts/init.js"
     ],
+    "styles": [
+        "styles/token-action-hud-megs.css"
+    ],
     "languages": [
         {
             "lang": "en",

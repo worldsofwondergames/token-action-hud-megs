@@ -70,10 +70,14 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 const category = attribute.type ?? ATTRIBUTE_CATEGORIES[0];
                 if (!byCategory.has(category)) byCategory.set(category, []);
 
-                const name = attribute.label ?? key.toUpperCase();
+                // The abbreviation, not the full label: nine attributes have to
+                // fit a 3x3 grid, and the sheet labels them this way too. The
+                // full name still appears in the tooltip via listName.
+                const abbr = key.toUpperCase();
+                const name = attribute.label ?? abbr;
                 byCategory.get(category).push({
                     id: `attribute-${key}`,
-                    name: `${name}: ${attribute.value ?? 0}`,
+                    name: `${abbr} ${attribute.value ?? 0}`,
                     listName: `Action: ${name}`,
                     cssClass: isRollable ? '' : 'disabled',
                     system: {
@@ -195,7 +199,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 },
             ];
 
-            this.addActions(actions, { id: GROUP.combat.id });
+            this.addActions(actions, { id: GROUP.utility.id });
         }
     };
 });

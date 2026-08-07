@@ -1,0 +1,42 @@
+/*
+ * Lay the nine MEGS attributes out as a 3x3 square.
+ *
+ * Each attribute category (Physical / Mental / Mystical) holds exactly three
+ * attributes, so forcing three equal columns per category and stacking the
+ * three categories produces the square. Targeting is by data-nest-id, which
+ * Token Action HUD Core puts on every subgroup element, so this cannot leak
+ * into the Powers, Skills, Gadgets or Utility lists.
+ */
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 2px;
+}
+
+/*
+ * Equal-sized boxes. Core sizes action buttons to their content, which would
+ * make DEX and SPIRIT different widths and break the grid alignment.
+ */
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-action {
+    width: 100%;
+}
+
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-action-button {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+    text-align: center;
+}
+
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-button-content {
+    justify-content: center;
+}
+
+/*
+ * Effect and Resisting attributes are shown for reference and open the sheet
+ * rather than rolling. Dim them so the three rollable ones read as the
+ * actionable column.
+ */
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-action.disabled .tah-action-button {
+    opacity: 0.65;
+}

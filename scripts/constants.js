@@ -46,5 +46,5 @@ export const GROUP = {
     powers: { id: 'powers', name: 'tokenActionHud.megs.powers', type: 'system' },
     skills: { id: 'skills', name: 'tokenActionHud.megs.skills', type: 'system' },
     gadgets: { id: 'gadgets', name: 'tokenActionHud.megs.gadgets', type: 'system' },
-    combat: { id: 'combat', name: 'tokenActionHud.megs.combat', type: 'system' },
+    utility: { id: 'utility', name: 'tokenActionHud.megs.utility', type: 'system' },
 };

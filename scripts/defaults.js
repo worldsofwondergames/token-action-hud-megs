@@ -9,6 +9,13 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         group.listName = `Group: ${group.name}`;
     });
 
+    /**
+     * Only Attributes has subgroups. Powers, Skills, Gadgets and Utility each
+     * hold a single flat list, so nesting them under a same-named subgroup would
+     * make every one of them open a submenu containing exactly one entry before
+     * the actions were reachable. Those four are top-level groups that carry
+     * their actions directly.
+     */
     DEFAULTS = {
         layout: [
             {
@@ -21,30 +28,10 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     { ...groups.mystical, nestId: 'attributes_mystical' },
                 ],
             },
-            {
-                nestId: 'powers',
-                id: 'powers',
-                name: coreModule.api.Utils.i18n('tokenActionHud.megs.powers'),
-                groups: [{ ...groups.powers, nestId: 'powers_powers' }],
-            },
-            {
-                nestId: 'skills',
-                id: 'skills',
-                name: coreModule.api.Utils.i18n('tokenActionHud.megs.skills'),
-                groups: [{ ...groups.skills, nestId: 'skills_skills' }],
-            },
-            {
-                nestId: 'gadgets',
-                id: 'gadgets',
-                name: coreModule.api.Utils.i18n('tokenActionHud.megs.gadgets'),
-                groups: [{ ...groups.gadgets, nestId: 'gadgets_gadgets' }],
-            },
-            {
-                nestId: 'utility',
-                id: 'utility',
-                name: coreModule.api.Utils.i18n('tokenActionHud.megs.utility'),
-                groups: [{ ...groups.combat, nestId: 'utility_combat' }],
-            },
+            { ...groups.powers, nestId: 'powers', groups: [] },
+            { ...groups.skills, nestId: 'skills', groups: [] },
+            { ...groups.gadgets, nestId: 'gadgets', groups: [] },
+            { ...groups.utility, nestId: 'utility', groups: [] },
         ],
         groups: Object.values(groups),
     };
