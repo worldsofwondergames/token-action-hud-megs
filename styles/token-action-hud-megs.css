@@ -1,11 +1,15 @@
 /*
- * Lay the nine MEGS attributes out as a 3x3 square.
+ * Equal-width action boxes for the attribute and skill lists.
  *
- * Each attribute category (Physical / Mental / Mystical) holds exactly three
- * attributes, so forcing three equal columns per category and stacking the
- * three categories produces the square. Targeting is by data-nest-id, which
- * Token Action HUD Core puts on every subgroup element, so this cannot leak
- * into the Powers, Skills, Gadgets or Utility lists.
+ * Targeting is by data-nest-id, which Token Action HUD Core puts on every
+ * subgroup element, so these rules cannot leak into the Powers, Gadgets or
+ * Utility lists.
+ */
+
+/*
+ * Attributes form a 3x3 square: each category (Physical / Mental / Mystical)
+ * holds exactly three attributes, so three fixed columns per category stacked
+ * three deep gives the square.
  */
 #token-action-hud-app [data-nest-id^="attributes_"] .tah-actions {
     display: grid;
@@ -14,21 +18,35 @@
 }
 
 /*
- * Equal-sized boxes. Core sizes action buttons to their content, which would
- * make DEX and SPIRIT different widths and break the grid alignment.
+ * Skills get equal widths too, but the column count adapts. Skill names are far
+ * longer than attribute abbreviations, so pinning them to three columns would
+ * squeeze them unreadably on a narrow HUD.
  */
-#token-action-hud-app [data-nest-id^="attributes_"] .tah-action {
+#token-action-hud-app [data-nest-id^="skills"] .tah-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 2px;
+}
+
+/*
+ * Core sizes action buttons to their content, which would make DEX and SPIRIT
+ * different widths and break the grid alignment.
+ */
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-action,
+#token-action-hud-app [data-nest-id^="skills"] .tah-action {
     width: 100%;
 }
 
-#token-action-hud-app [data-nest-id^="attributes_"] .tah-action-button {
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-action-button,
+#token-action-hud-app [data-nest-id^="skills"] .tah-action-button {
     width: 100%;
     min-width: 0;
     justify-content: center;
     text-align: center;
 }
 
-#token-action-hud-app [data-nest-id^="attributes_"] .tah-button-content {
+#token-action-hud-app [data-nest-id^="attributes_"] .tah-button-content,
+#token-action-hud-app [data-nest-id^="skills"] .tah-button-content {
     justify-content: center;
 }
 

@@ -32,7 +32,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             if (CHARACTER_TYPES.includes(type)) {
                 this.#buildAttributes();
                 this.#buildPowers();
-                this.#buildSkills();
+                await this.#buildSkills();
                 this.#buildGadgets();
                 this.#buildUtility();
                 return;
@@ -121,42 +121,78 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
 
         /* ---------------------------------------------------------------- */
 
-        #buildSkills() {
+        /**
+         * Skills, with subskills nested under their parent.
+         *
+         * A skill that has trained subskills becomes its own subgroup holding
+         * the skill itself plus each subskill, so the parent stays rollable
+         * alongside its specialisations. A skill with no subskills is added
+         * directly -- wrapping it in a subgroup would mean opening a submenu
+         * containing a single entry.
+         */
+        async #buildSkills() {
             const showSubskills = game.settings.get(MODULE.ID, 'showSubskills');
 
             const skills = this.actor.items
                 .filter(i => i.type === 'skill' && !i.system.parent && (i.system.aps ?? 0) > 0)
                 .sort(byName);
+            if (!skills.length) return;
 
-            const actions = skills.map(item => ({
+            const subskillsByParent = new Map();
+            if (showSubskills) {
+                for (const item of this.actor.items) {
+                    if (item.type !== 'subskill' || !item.system.isTrained) continue;
+                    const list = subskillsByParent.get(item.system.parent) ?? [];
+                    list.push(item);
+                    subskillsByParent.set(item.system.parent, list);
+                }
+            }
+
+            const flat = [];
+            for (const skill of skills) {
+                const subskills = (subskillsByParent.get(skill.id) ?? []).sort(byName);
+                const skillAction = this.#skillAction(skill);
+
+                if (!subskills.length) {
+                    flat.push(skillAction);
+                    continue;
+                }
+
+                const groupData = {
+                    id: `skill-${skill.id}`,
+                    name: skill.name,
+                    type: 'system-derived',
+                };
+                await this.addGroup(groupData, { id: GROUP.skills.id, type: 'system' });
+                this.addActions(
+                    [skillAction, ...subskills.map(sub => this.#subskillAction(sub))],
+                    groupData
+                );
+            }
+
+            if (flat.length) this.addActions(flat, { id: GROUP.skills.id });
+        }
+
+        /** @private */
+        #skillAction(item) {
+            return {
                 id: item.id,
                 name: `${item.name}: ${item.system.aps}`,
                 listName: `Action: ${item.name}`,
                 img: coreModule.api.Utils.getImage(item),
                 system: { actionType: ACTION_TYPE.skill, actionId: item.id },
-            }));
+            };
+        }
 
-            if (showSubskills) {
-                const skillIds = new Set(skills.map(s => s.id));
-                const subskills = this.actor.items
-                    .filter(i => i.type === 'subskill'
-                        && i.system.isTrained
-                        && skillIds.has(i.system.parent))
-                    .sort(byName);
-
-                for (const item of subskills) {
-                    const parent = skills.find(s => s.id === item.system.parent);
-                    actions.push({
-                        id: item.id,
-                        name: `${parent.name} / ${item.name}`,
-                        listName: `Action: ${parent.name} / ${item.name}`,
-                        img: coreModule.api.Utils.getImage(item),
-                        system: { actionType: ACTION_TYPE.subskill, actionId: item.id },
-                    });
-                }
-            }
-
-            if (actions.length) this.addActions(actions, { id: GROUP.skills.id });
+        /** @private */
+        #subskillAction(item) {
+            return {
+                id: item.id,
+                name: `${item.name}: ${item.system.aps}`,
+                listName: `Action: ${item.name}`,
+                img: coreModule.api.Utils.getImage(item),
+                system: { actionType: ACTION_TYPE.subskill, actionId: item.id },
+            };
         }
 
         /* ---------------------------------------------------------------- */
