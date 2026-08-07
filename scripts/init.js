@@ -1,5 +1,6 @@
 import { SystemManager } from './system-manager.js';
 import { MODULE, REQUIRED_CORE_MODULE_VERSION } from './constants.js';
+import './suppress-tooltips.js';
 
 /**
  * Publishes this module's SystemManager to Token Action HUD Core.

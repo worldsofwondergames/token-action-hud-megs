@@ -107,7 +107,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${abbr} ${attribute.value ?? 0}`,
                 listName: `Action: ${name}`,
                 cssClass: isRollable ? '' : 'disabled',
-                tooltip: `${name}: ${attribute.value ?? 0}`,
                 system: {
                     actionType: isRollable ? ACTION_TYPE.attribute : ACTION_TYPE.attributeInfo,
                     actionId: key,
@@ -133,7 +132,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     name: `${item.name}: ${item.system.aps}`,
                     listName: `Action: ${item.name}`,
                     img: coreModule.api.Utils.getImage(item),
-                    tooltip: `Power — ${item.system.aps} APs${linkSuffix(item)}`,
                     system: { actionType: ACTION_TYPE.power, actionId: item.id },
                 }));
 
@@ -215,7 +213,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${item.name}: ${item.system.aps}`,
                 listName: `Action: ${item.name}`,
                 img: coreModule.api.Utils.getImage(item),
-                tooltip: `Skill — ${item.system.aps} APs${linkSuffix(item)}`,
                 system: { actionType: ACTION_TYPE.skill, actionId: item.id },
             };
         }
@@ -227,7 +224,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${item.name}: ${item.system.aps}`,
                 listName: `Action: ${item.name}`,
                 img: coreModule.api.Utils.getImage(item),
-                tooltip: `Subskill — ${item.system.aps} APs`,
                 system: { actionType: ACTION_TYPE.subskill, actionId: item.id },
             };
         }
@@ -245,7 +241,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     listName: `Action: ${item.name}`,
                     img: coreModule.api.Utils.getImage(item),
                     cssClass: item.system.isBroken ? 'disabled' : '',
-                    tooltip: gadgetTooltip(item),
                     system: { actionType: ACTION_TYPE.gadget, actionId: item.id },
                 }));
 
@@ -263,14 +258,12 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     id: 'initiative',
                     name: coreModule.api.Utils.i18n('tokenActionHud.megs.rollInitiative'),
                     listName: 'Action: Roll Initiative',
-                    tooltip: 'Roll initiative, prompting for Hero Points to spend',
                     system: { actionType: ACTION_TYPE.initiative, actionId: 'initiative' },
                 },
                 {
                     id: 'endTurn',
                     name: coreModule.api.Utils.i18n('tokenActionHud.megs.endTurn'),
                     listName: 'Action: End Turn',
-                    tooltip: 'Advance the encounter to the next combatant',
                     system: { actionType: ACTION_TYPE.endTurn, actionId: 'endTurn' },
                 },
             ];
@@ -279,26 +272,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
     };
 });
-
-/**
- * Token Action HUD Core always renders a tooltip: getTooltip() falls back to the
- * action's own name whenever a module supplies a falsy one, and an object with
- * empty content still produces an empty wrapper. There is no per-action way to
- * turn it off -- only Core's global "Tooltips" setting. So rather than repeat
- * the label, these say something the label does not.
- */
-function linkSuffix(item) {
-    const link = item.system?.link;
-    return link ? `, linked to ${String(link).toUpperCase()}` : '';
-}
-
-function gadgetTooltip(item) {
-    const bits = [];
-    if (item.system?.actionValue) bits.push(`AV ${item.system.actionValue}`);
-    if (item.system?.effectValue) bits.push(`EV ${item.system.effectValue}`);
-    if (item.system?.isBroken) bits.push('broken');
-    return bits.length ? `Gadget — ${bits.join(', ')}` : 'Gadget';
-}
 
 function byName(a, b) {
     return a.name.localeCompare(b.name);
