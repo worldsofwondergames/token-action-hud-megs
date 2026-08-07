@@ -6,7 +6,7 @@ Token Action HUD puts a repositionable HUD of actions next to the selected token
 
 ## Status
 
-**Phase 2 — skeleton.** The HUD registers and renders its tabs. It does not yet populate them with actions; that is Phase 3. Tracked in [megs#156](https://github.com/worldsofwondergames/megs/issues/156).
+**Phases 2–4 written, verification pending.** The HUD registers, builds its five tabs and dispatches clicks to the MEGS roll system. It has not yet been exercised in a running world. Tracked in [megs#156](https://github.com/worldsofwondergames/megs/issues/156).
 
 ## Requirements
 

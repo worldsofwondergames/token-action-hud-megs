@@ -10,26 +10,27 @@ export const SYSTEM = { ID: 'megs' };
 export const REQUIRED_CORE_MODULE_VERSION = '2.1';
 
 /**
- * MEGS attribute order is fixed: every third attribute is an Acting attribute
- * and is the only one that can be rolled. The other six are Effect and
- * Resisting attributes, which the system shows but does not roll.
+ * Attribute category and rollability are read from the actor's own data rather
+ * than hardcoded here: every MEGS attribute carries `type` (physical / mental /
+ * mystical) and a `rolls` array, and only the three Acting attributes list
+ * "action". Deriving from that keeps this module correct if the system ever
+ * adds an attribute or changes which ones can be rolled.
  */
-export const ACTING_ATTRIBUTES = ['dex', 'int', 'infl'];
+export const ACTION_ROLL = 'action';
 
-export const ATTRIBUTE_CATEGORIES = {
-    physical: ['dex', 'str', 'body'],
-    mental: ['int', 'will', 'mind'],
-    mystical: ['infl', 'aura', 'spirit'],
-};
+/** Fallback order for grouping, used only if an attribute is missing `type`. */
+export const ATTRIBUTE_CATEGORIES = ['physical', 'mental', 'mystical'];
 
 /** Action types, resolved by the roll handler. */
 export const ACTION_TYPE = {
     attribute: 'attribute',
+    attributeInfo: 'attributeInfo',
     power: 'power',
     skill: 'skill',
     subskill: 'subskill',
     gadget: 'gadget',
-    utility: 'utility',
+    endTurn: 'endTurn',
+    initiative: 'initiative',
 };
 
 /** Actor types the HUD builds a full action set for. */
