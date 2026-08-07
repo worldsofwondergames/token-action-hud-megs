@@ -1,0 +1,27 @@
+{
+    "tokenActionHud": {
+        "megs": {
+            "attributes": "Attributes",
+            "physical": "Physical",
+            "mental": "Mental",
+            "mystical": "Mystical",
+            "powers": "Powers",
+            "skills": "Skills",
+            "gadgets": "Gadgets",
+            "utility": "Utility",
+            "combat": "Combat",
+            "endTurn": "End Turn",
+            "rollInitiative": "Roll Initiative",
+            "settings": {
+                "showSubskills": {
+                    "name": "Show subskills",
+                    "hint": "Display trained subskills beneath their parent skill in the Skills group."
+                },
+                "showNonRollableAttributes": {
+                    "name": "Show non-rollable attributes",
+                    "hint": "Display Effect and Resisting attributes alongside the Acting attributes. Only Acting attributes (DEX, INT, INFL) can be rolled; the others open the character sheet."
+                }
+            }
+        }
+    }
+}

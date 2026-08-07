@@ -1,0 +1,51 @@
+{
+    "id": "token-action-hud-megs",
+    "title": "Token Action HUD MEGS",
+    "description": "Token Action HUD system module for the MEGS (DC Heroes 3rd Edition) system. Adds a repositionable HUD of attribute, power, skill and gadget actions for the selected token.",
+    "version": "0.1.0",
+    "compatibility": {
+        "minimum": "13.351",
+        "verified": "14.365"
+    },
+    "esmodules": [
+        "scripts/init.js"
+    ],
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "languages/en.json"
+        }
+    ],
+    "relationships": {
+        "systems": [
+            {
+                "id": "megs",
+                "type": "system",
+                "compatibility": {
+                    "minimum": "1.1.1",
+                    "verified": "1.1.1"
+                }
+            }
+        ],
+        "requires": [
+            {
+                "id": "token-action-hud-core",
+                "type": "module",
+                "compatibility": {
+                    "minimum": "2.1",
+                    "verified": "2.1.1"
+                }
+            }
+        ]
+    },
+    "authors": [
+        {
+            "name": "worldsofwondergames",
+            "url": "https://github.com/worldsofwondergames"
+        }
+    ],
+    "url": "https://github.com/worldsofwondergames/token-action-hud-megs",
+    "manifest": "https://raw.githubusercontent.com/worldsofwondergames/token-action-hud-megs/main/module.json",
+    "download": "https://github.com/worldsofwondergames/token-action-hud-megs/archive/refs/heads/main.zip"
+}
