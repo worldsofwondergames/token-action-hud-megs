@@ -44,8 +44,10 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 case ACTION_TYPE.power:
                 case ACTION_TYPE.skill:
                 case ACTION_TYPE.subskill:
-                case ACTION_TYPE.gadget:
                     return this.#rollItem(actor, actionId);
+
+                case ACTION_TYPE.gadget:
+                    return this.#rollGadget(actor, actionId);
 
                 case ACTION_TYPE.attributeInfo:
                     // Effect and Resisting attributes are not rolled on their own.
@@ -128,6 +130,27 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
             return item.roll();
         }
 
+        /**
+         * A gadget with nothing to roll -- no AV/EV, no child power or skill with
+         * APs, no attribute pair -- would otherwise just post its description to
+         * chat, which reads as the button doing nothing. Open its sheet instead,
+         * with edit mode off so it opens read-only.
+         *
+         * @private
+         */
+        async #rollGadget(actor, itemId) {
+            const item = actor.items.get(itemId);
+            if (!item) {
+                console.warn(`token-action-hud-megs: gadget ${itemId} not found on ${actor.name}`);
+                return;
+            }
+
+            if (isGadgetRollable(item, actor)) return item.roll();
+
+            await item.setFlag('megs', 'edit-mode', false);
+            return item.sheet.render(true);
+        }
+
         /** @private */
         async #rollInitiative(actor, token) {
             if (!game.combat) return;
@@ -153,6 +176,23 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         }
     };
 });
+
+/**
+ * Whether a gadget has anything to roll.
+ *
+ * Delegates to the system's own Utils.getGadgetRollOptions() through game.megs
+ * rather than restating the rule, so the HUD cannot drift from what the gadget
+ * sheet and the picker consider rollable.
+ */
+export function isGadgetRollable(item, actor) {
+    const getOptions = game.megs?.Utils?.getGadgetRollOptions;
+    if (typeof getOptions !== 'function') {
+        // Older MEGS: assume rollable and let the system decide, rather than
+        // silently refusing to roll gadgets that are perfectly fine.
+        return true;
+    }
+    return getOptions(item, actor).length > 0;
+}
 
 /**
  * MEGS pairs each Acting attribute with an Effect attribute: DEX/STR, INT/WILL,

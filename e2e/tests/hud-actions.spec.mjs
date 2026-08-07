@@ -1,3 +1,4 @@
+/* global canvas -- Foundry global used inside page.evaluate callbacks */
 import { test, expect } from '../fixtures/foundry-test.mjs';
 import {
     prefixName,
@@ -34,6 +35,7 @@ import {
  */
 test.describe('HUD actions', () => {
     let actorId;
+    let inertGadgetId;
     let scene;
     let moduleConfig;
 
@@ -67,6 +69,11 @@ test.describe('HUD actions', () => {
         });
 
         await addGadgetToActor(page, actorId, { name: '_E2E_Blaster', av: 6, ev: 8 });
+        // Nothing to roll: no AV/EV, no attributes, no child items.
+        inertGadgetId = await addGadgetToActor(page, actorId, {
+            name: '_E2E_Inert', av: 0, ev: 0,
+            hasAttributes: { physical: 'false', mental: 'false', mystical: 'false' },
+        });
 
         scene = await buildScene(page, [actorId]);
         await selectToken(page, actorId);
@@ -163,5 +170,30 @@ test.describe('HUD actions', () => {
         await clickAction(page, '_E2E_Blaster');
         await page.waitForSelector('dialog.dialog[open] .megs-dialog #actionValue', { timeout: 15_000 });
         await expect(page.locator('dialog.dialog[open] .megs-dialog #actionValue')).toBeVisible();
+    });
+
+    test('a gadget with nothing to roll opens its sheet, not edit mode', async ({ page }) => {
+        await clickAction(page, '_E2E_Inert');
+
+        const sheet = page.locator('.sheet.item:has-text("_E2E_Inert")');
+        await expect(sheet).toBeVisible({ timeout: 15_000 });
+
+        // The sheet must open read-only. Assert the flag the sheet reads rather
+        // than a rendered control, so a template change cannot quietly pass.
+        // Looked up by id: searching actors by name prefix can land on a stale
+        // actor from an earlier test and silently report undefined.
+        // Read the token's own actor, not the base actor. Tokens are unlinked by
+        // default, so the HUD acts on a synthetic copy and that is where the
+        // flag lands -- asserting against the base actor reports undefined.
+        const editMode = await page.evaluate((name) => {
+            const actor = canvas.tokens.controlled[0]?.actor;
+            const gadget = actor?.items.find(i => i.name === name);
+            if (!gadget) throw new Error('Inert gadget not found on the controlled token');
+            return gadget.getFlag('megs', 'edit-mode');
+        }, '_E2E_Inert');
+        expect(editMode).toBe(false);
+
+        // And it must not have tried to roll.
+        await expect(page.locator('dialog.dialog[open] .megs-dialog #actionValue')).toHaveCount(0);
     });
 });
