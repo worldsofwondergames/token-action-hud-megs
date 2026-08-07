@@ -260,15 +260,40 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     listName: 'Action: Roll Initiative',
                     system: { actionType: ACTION_TYPE.initiative, actionId: 'initiative' },
                 },
-                {
+            ];
+
+            // End Turn is only offered to whoever is actually up. Showing it
+            // otherwise invites a player to end someone else's turn.
+            if (this.#isActorsTurn()) {
+                actions.push({
                     id: 'endTurn',
                     name: coreModule.api.Utils.i18n('tokenActionHud.megs.endTurn'),
                     listName: 'Action: End Turn',
                     system: { actionType: ACTION_TYPE.endTurn, actionId: 'endTurn' },
-                },
-            ];
+                });
+            }
 
             this.addActions(actions, { id: GROUP.utility.id });
+        }
+
+        /**
+         * True only when an encounter has actually begun and the current
+         * combatant is this token. A combat that exists but has not been started
+         * has no current turn, so nobody's turn it is.
+         *
+         * @private
+         */
+        #isActorsTurn() {
+            const combat = game.combat;
+            if (!combat?.started) return false;
+
+            const combatant = combat.combatant;
+            if (!combatant) return false;
+
+            // Match on the token first: an actor can have several tokens in the
+            // encounter, and only the one whose turn it is should offer End Turn.
+            if (this.token?.id) return combatant.tokenId === this.token.id;
+            return !!this.actor && combatant.actorId === this.actor.id;
         }
     };
 });
