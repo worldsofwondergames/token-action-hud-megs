@@ -154,6 +154,12 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         async #buildSkills() {
             const showSubskills = game.settings.get(MODULE.ID, 'showSubskills');
 
+            // The actor's own "Hide Zero Rank Skills" checkbox. Stored as a
+            // string by the sheet template, so "false" must not read as truthy --
+            // a mistake this system has made before with other flags.
+            const raw = this.actor.system?.settings?.hideZeroAPSkills;
+            const hideZeroApSkills = String(raw ?? true) !== 'false';
+
             const subskillsByParent = new Map();
             if (showSubskills) {
                 for (const item of this.actor.items) {
@@ -164,18 +170,22 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 }
             }
 
-            // A skill at 0 APs is still shown when it carries trained subskills:
-            // specialising in a subskill without buying the parent skill is the
-            // normal MEGS pattern, and excluding those hid the subskills too.
             const skills = this.actor.items
-                .filter(i => i.type === 'skill' && !i.system.parent
-                    && ((i.system.aps ?? 0) > 0 || subskillsByParent.has(i.id)))
+                .filter(i => i.type === 'skill' && !i.system.parent)
                 .sort(byName);
-            if (!skills.length) return;
 
             const flat = [];
             for (const skill of skills) {
-                const subskills = (subskillsByParent.get(skill.id) ?? []).sort(byName);
+                const skillAps = skill.system.aps ?? 0;
+
+                // A subskill is only worth listing when it beats the base skill;
+                // at or below it, rolling the skill itself is the same or better.
+                const subskills = (subskillsByParent.get(skill.id) ?? [])
+                    .filter(sub => (sub.system.aps ?? 0) > skillAps)
+                    .sort(byName);
+
+                if (skillAps === 0 && !subskills.length && hideZeroApSkills) continue;
+
                 const skillAction = this.#skillAction(skill);
 
                 if (!subskills.length) {
