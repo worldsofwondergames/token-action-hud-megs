@@ -6,7 +6,7 @@ Token Action HUD puts a repositionable HUD of actions next to the selected token
 
 ## Status
 
-**Phases 2–4 written, verification pending.** The HUD registers, builds its five tabs and dispatches clicks to the MEGS roll system. It has not yet been exercised in a running world. Tracked in [megs#156](https://github.com/worldsofwondergames/megs/issues/156).
+**Working and covered by tests.** The HUD registers, builds its five tabs, and dispatches clicks into the MEGS roll system. Verified against Foundry 14.365 with Token Action HUD Core 2.1.1. Tracked in [megs#156](https://github.com/worldsofwondergames/megs/issues/156).
 
 ## Requirements
 
@@ -47,3 +47,20 @@ Vehicles and locations show gadgets only. The `pet` actor type is unsupported �
 
 - **Show subskills** — display trained subskills beneath their parent skill. Default off.
 - **Show non-rollable attributes** — display Effect and Resisting attributes alongside the Acting ones. Default on.
+
+## Tests
+
+Playwright drives a real Foundry world rather than mocking it, since every bug found so far lived in the interaction between Core, Foundry and the MEGS system rather than in isolated logic.
+
+```
+npm install
+npm run test:e2e
+```
+
+Requirements for a run:
+
+- Foundry must be running at `localhost:30000` with the MEGS test world active.
+- Nobody may be logged in. Foundry allows one Gamemaster session, and the suite needs it.
+- Foundry must have been restarted since this module was added — it only scans `Data/modules` at server startup.
+
+The suite enables Token Action HUD in the world and restores the previous module configuration afterwards.
