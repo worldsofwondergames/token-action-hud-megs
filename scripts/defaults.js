@@ -10,11 +10,10 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
     });
 
     /**
-     * Only Attributes has subgroups. Powers, Skills, Gadgets and Utility each
-     * hold a single flat list, so nesting them under a same-named subgroup would
-     * make every one of them open a submenu containing exactly one entry before
-     * the actions were reachable. Those four are top-level groups that carry
-     * their actions directly.
+     * Every tab needs at least one subgroup. Core's group template renders a
+     * subgroups container and never renders actions directly, so a top-level
+     * group with `groups: []` has nowhere to put its actions and shows up
+     * empty. Powers, Skills and Gadgets therefore each keep a subgroup.
      */
     DEFAULTS = {
         layout: [
@@ -28,10 +27,30 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     { ...groups.mystical, nestId: 'attributes_mystical' },
                 ],
             },
-            { ...groups.powers, nestId: 'powers', groups: [] },
-            { ...groups.skills, nestId: 'skills', groups: [] },
-            { ...groups.gadgets, nestId: 'gadgets', groups: [] },
-            { ...groups.utility, nestId: 'utility', groups: [] },
+            {
+                nestId: 'powers',
+                id: 'powers-tab',
+                name: coreModule.api.Utils.i18n('tokenActionHud.megs.powers'),
+                groups: [{ ...groups.powers, nestId: 'powers_powers' }],
+            },
+            {
+                nestId: 'skills',
+                id: 'skills-tab',
+                name: coreModule.api.Utils.i18n('tokenActionHud.megs.skills'),
+                groups: [{ ...groups.skills, nestId: 'skills_skills' }],
+            },
+            {
+                nestId: 'gadgets',
+                id: 'gadgets-tab',
+                name: coreModule.api.Utils.i18n('tokenActionHud.megs.gadgets'),
+                groups: [{ ...groups.gadgets, nestId: 'gadgets_gadgets' }],
+            },
+            {
+                nestId: 'utility',
+                id: 'utility-tab',
+                name: coreModule.api.Utils.i18n('tokenActionHud.megs.utility'),
+                groups: [{ ...groups.utility, nestId: 'utility_utility' }],
+            },
         ],
         groups: Object.values(groups),
     };
