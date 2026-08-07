@@ -107,6 +107,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${abbr} ${attribute.value ?? 0}`,
                 listName: `Action: ${name}`,
                 cssClass: isRollable ? '' : 'disabled',
+                tooltip: `${name}: ${attribute.value ?? 0}`,
                 system: {
                     actionType: isRollable ? ACTION_TYPE.attribute : ACTION_TYPE.attributeInfo,
                     actionId: key,
@@ -132,6 +133,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     name: `${item.name}: ${item.system.aps}`,
                     listName: `Action: ${item.name}`,
                     img: coreModule.api.Utils.getImage(item),
+                    tooltip: '',
                     system: { actionType: ACTION_TYPE.power, actionId: item.id },
                 }));
 
@@ -152,11 +154,6 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
         async #buildSkills() {
             const showSubskills = game.settings.get(MODULE.ID, 'showSubskills');
 
-            const skills = this.actor.items
-                .filter(i => i.type === 'skill' && !i.system.parent && (i.system.aps ?? 0) > 0)
-                .sort(byName);
-            if (!skills.length) return;
-
             const subskillsByParent = new Map();
             if (showSubskills) {
                 for (const item of this.actor.items) {
@@ -166,6 +163,15 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     subskillsByParent.set(item.system.parent, list);
                 }
             }
+
+            // A skill at 0 APs is still shown when it carries trained subskills:
+            // specialising in a subskill without buying the parent skill is the
+            // normal MEGS pattern, and excluding those hid the subskills too.
+            const skills = this.actor.items
+                .filter(i => i.type === 'skill' && !i.system.parent
+                    && ((i.system.aps ?? 0) > 0 || subskillsByParent.has(i.id)))
+                .sort(byName);
+            if (!skills.length) return;
 
             const flat = [];
             for (const skill of skills) {
@@ -199,6 +205,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${item.name}: ${item.system.aps}`,
                 listName: `Action: ${item.name}`,
                 img: coreModule.api.Utils.getImage(item),
+                tooltip: '',
                 system: { actionType: ACTION_TYPE.skill, actionId: item.id },
             };
         }
@@ -210,6 +217,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                 name: `${item.name}: ${item.system.aps}`,
                 listName: `Action: ${item.name}`,
                 img: coreModule.api.Utils.getImage(item),
+                tooltip: '',
                 system: { actionType: ACTION_TYPE.subskill, actionId: item.id },
             };
         }
@@ -227,6 +235,7 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     listName: `Action: ${item.name}`,
                     img: coreModule.api.Utils.getImage(item),
                     cssClass: item.system.isBroken ? 'disabled' : '',
+                    tooltip: '',
                     system: { actionType: ACTION_TYPE.gadget, actionId: item.id },
                 }));
 
@@ -244,12 +253,14 @@ Hooks.once('tokenActionHudCoreApiReady', async (coreModule) => {
                     id: 'initiative',
                     name: coreModule.api.Utils.i18n('tokenActionHud.megs.rollInitiative'),
                     listName: 'Action: Roll Initiative',
+                    tooltip: '',
                     system: { actionType: ACTION_TYPE.initiative, actionId: 'initiative' },
                 },
                 {
                     id: 'endTurn',
                     name: coreModule.api.Utils.i18n('tokenActionHud.megs.endTurn'),
                     listName: 'Action: End Turn',
+                    tooltip: '',
                     system: { actionType: ACTION_TYPE.endTurn, actionId: 'endTurn' },
                 },
             ];
